@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>AppSeriesAndFilms</title>
+    </head>
+    <body>
+        <form id="main" v-cloak>
+
+            
+            <div class="bar">
+                <input type="text"  v-model="searchString" placeholder="Enter your search terms" />
+                <a class="displaySearch" v-on:click="searchMovies"> Search</a>
+                <a class="displayMovies" v-on:click="listType = 'movies'"> Movies</a>
+                <a class="displayShows" v-on:click="listType = 'shows'">Shows</a>
+            </div>
+
+
+            <ul v-if="listType == 'movies'" class="movies">
+                <h1>Movies</h1>
+                <li v-for="movie in movies">
+                    <p>{{movie}}</p>
+                </li>
+            </ul>
+                
+            <!--<pre>{{ movies }}</pre>-->
+            </div>
+
+            <ul v-if="listType == 'shows'" class="shows">
+                <h1>Shows</h1>
+                <li v-for="show in shows">
+                <!-- <img v-bind:src="show.images.poster"/>-->
+                    <p>{{show}}</p>
+                </li>
+            </ul>
+
+            <ul v-if="listType == 'search'" class="search">
+                <h1>Search Result</h1>
+                <h2>Movies</h2>
+                <li v-for="element in searchList.movies">
+                    <p>{{element}}</p>
+                </li>
+                <h2>Show</h2>
+                <li v-for="element in searchList.shows">
+                    <p>{{element}}</p>
+                </li>
+            </ul>
+
+        </form>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.0.5/vue.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script type='text/javascript' src='config.js'></script>
+        <script type='text/javascript' src='script.js'></script>
+        <script>
+            var demo = new Vue({
+                el:'#main',
+                data : {
+                    mykey=config.MY_KEY,
+                    searchString: "",
+                    listType:'movies',
+                    movies : [],
+                    shows : [],
+                    searchList :[]
+                },computed :{
+                    axiosParam(){
+
+                    }
+                },
+                methods :{
+                 searchMovies : function(){
+                    let searchString = this.searchString,queryParams;
+                    if(!searchString){
+                        return null;
+                    }
+
+                    //searchString = searchString.trim().toLowerCase();
+
+                    queryParams =searchString.trim().toLowerCase();
+
+                    axios
+                    .get('https://api.betaseries.com/search/all',{
+                        params :{
+                            query : queryParams,
+                            key : this.mykey
+                        }
+                    })
+                    .then(res => {
+                        this.searchList = res.data
+                    })
+                    return this.listType='search' 
+                 }
+                },
+                beforeCreate(){
+                    axios
+                    .get('https://api.betaseries.com/movies/list',{
+                        params :{
+                            key:this.mykey
+                        }
+                    })
+                    .then(res => {
+                        this.movies = res.data.movies
+                        
+                    })
+                    axios
+                    .get('https://api.betaseries.com/shows/list',{
+                        params:{
+                            key:this.mykey
+                        }
+                    })
+                    .then(res => {
+                        this.shows = res.data.shows
+                    })
+                }
+            })
+        </script>
+    </body>
+</html>
