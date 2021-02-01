@@ -74,10 +74,28 @@
                 text-indent: 40px;
             }
 
+            .bar input[type=button]{
+
+                background:#fff no-repeat 13px 13px;
+                border-radius: 2px;
+                box-shadow: 0 2px 8px #c4c4c4 inset;
+                text-align: center;
+                font-size: 14px;
+                font-family: inherit;
+                color: #738289;
+                font-weight: bold;
+                outline: none;
+                
+            }
+
             ul{
                 list-style: none;
                 width: 428px;
                 margin: 0 auto;
+                text-align: left;
+            }
+
+            ul h1{
                 text-align: left;
             }
 
@@ -88,10 +106,14 @@
             }
 
             ul li img{
-                width:60px;
-                height:60px;
-                float:left;
-                border:none;
+                width:30%;
+                height:auto;
+                display: block;
+                margin-top: 3%;
+                margin-left: auto;
+                margin-right: auto;
+               
+                
             }
 
             ul li p{
@@ -108,7 +130,7 @@
 
             
             <div class="bar">
-                <input type="text" class="search" v-model="searchString" placeholder="Enter your search terms" />
+                <input type="text" class="search" v-model="searchString" placeholder="Rechercher un film ou une série" />
                 <input type="button"  class="displaySearch" v-on:click="searchMovies" value="Search" >
                 <input type="button" class="displayMovies" value="Movies" v-on:click="listType = 'movies'">
                 <input type="button" class="displayShows"  value="Shows" v-on:click="listType = 'shows'">
@@ -116,10 +138,10 @@
 
 
             <ul v-if="listType == 'movies'" class="movies">
-                <h1>Movies</h1>
+                <h1> Last movies to discover</h1>
                 <li v-for="movie in movies">
-                    <p>Titre : {{movie.title}}</p>
-                    <p>Année de production : {{movie.production_year}}</p>
+                    <p> Title : {{movie.title}}</p>
+                    <p> Production year : {{movie.production_year}}</p>
                 </li>
             </ul>
                 
@@ -129,11 +151,12 @@
             <ul v-if="listType == 'shows'" class="shows">
                 <h1>Shows</h1>
                 <li v-for="show in shows">
-                <!-- <img v-bind:src="show.images.poster"/>-->
-                    <p> Titre : {{show.title}}</p>
+                
+                    <p> Title : {{show.title}}</p>
                     <p> Description : {{show.description}}</p>
-                    <p>Nombre de saisons : {{show.seasons}}</p>
-                    <p>Site : {{show.network}}</p>
+                    <p> Seasons : {{show.seasons}}</p>
+                    <p> Network : {{show.network}}</p>
+                    <img v-bind:src="show.images.poster"/>
                 </li>
             </ul>
 
@@ -141,15 +164,16 @@
                 <h1>Search Result</h1>
                 <h2>Movies</h2>
                 <li v-for="element in searchList.movies">
-                    <p>Titre : {{element.title}}</p>
-                    <p>Année de production : {{element.production_year}}</p>
+                    <p>Title : {{element.title}}</p>
+                    <p>Production year : {{element.production_year}}</p>
                 </li>
                 <h2>Show</h2>
                 <li v-for="element in searchList.shows">
-                    <p> Titre : {{element.title}}</p>
+                    <p> TItle : {{element.title}}</p>
                     <p> Description : {{element.description}}</p>
-                    <p>Nombre de saisons : {{element.seasons}}</p>
-                    <p>Site : {{element.network}}</p>
+                    <p> Seasons : {{element.seasons}}</p>
+                    <p> Network : {{element.network}}</p>
+                    
                 </li>
             </ul>
 
@@ -173,34 +197,48 @@
                     }
                 },
                 methods :{
-                 searchMovies : function(){
-                    let searchString = this.searchString,queryParams;
-                    if(!searchString){
-                        return null;
-                    }
-
-                    //searchString = searchString.trim().toLowerCase();
-
-                    queryParams =searchString.trim().toLowerCase();
-
-                    axios
-                    .get('https://api.betaseries.com/search/all',{
-                        params :{
-                            query : queryParams,
-                            key : config.MY_KEY
+                    searchMovies : function(){
+                        let searchString = this.searchString,queryParams;
+                        if(!searchString){
+                            return null;
                         }
-                    })
-                    .then(res => {
-                        this.searchList = res.data
-                    })
-                    return this.listType='search' 
-                 }
+
+                        //searchString = searchString.trim().toLowerCase();
+
+                        queryParams =searchString.trim().toLowerCase();
+
+                        axios
+                        .get('https://api.betaseries.com/search/all',{
+                            params :{
+                                query : queryParams,
+                                key : 'fcbaabfce695'
+                            }
+                        })
+                        .then(res => {
+                            this.searchList = res.data
+                        })
+                        return this.listType='search' 
+                    },
+                    getMediaPicture : function(media_id){
+                        axios
+                        .get('https://api.betaseries.com/movies/movie',{
+                            params :{
+                                id : media_id,
+                                key : 'fcbaabfce695'
+                            }
+                        })
+                        .then(res=>{
+                            return res.data.images.poster
+                        })
+                    }
+                    
                 },
                 beforeCreate(){
                     axios
-                    .get('https://api.betaseries.com/movies/list',{
+                    .get('https://api.betaseries.com/movies/discover',{
                         params :{
-                            key:config.MY_KEY
+                            type:'popular',
+                            key:'fcbaabfce695'
                         }
                     })
                     .then(res => {
@@ -208,9 +246,9 @@
                         
                     })
                     axios
-                    .get('https://api.betaseries.com/shows/list',{
+                    .get('https://api.betaseries.com/shows/discover',{
                         params:{
-                            key: config.MY_KEY
+                            key: 'fcbaabfce695'
                         }
                     })
                     .then(res => {
